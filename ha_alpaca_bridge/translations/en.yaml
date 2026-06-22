@@ -1,0 +1,66 @@
+name: "HA Alpaca Bridge"
+description: "Expose Home Assistant entities as ASCOM Alpaca devices for astronomy software."
+configuration:
+  log_level:
+    name: Log level
+  alpaca_port:
+    name: Alpaca TCP port
+    description: "Port exposed to ASCOM Alpaca clients (NINA, Voyager, ASCOM Remote)."
+  alpaca_name:
+    name: Alpaca server name
+  alpaca_location:
+    name: Observatory location
+    description: "Optional location string returned by the Alpaca management API."
+  cache_enabled:
+    name: Enable status cache
+    description: "Cache Home Assistant entity states to reduce API load."
+  cache_ttl_seconds:
+    name: Status cache TTL (seconds)
+    description: "How long cached entity states remain valid before refreshing from Home Assistant."
+  homeassistant_timeout_seconds:
+    name: Home Assistant API timeout (seconds)
+  fail_safe_on_ha_error:
+    name: Fail-safe on Home Assistant errors
+    description: "Treat weather/roof state as unsafe when Home Assistant cannot be reached."
+  fail_safe_on_unknown_state:
+    name: Fail-safe on unknown states
+    description: "Treat unknown or unavailable entity states as unsafe."
+  max_state_age_seconds:
+    name: Maximum state age (seconds)
+    description: "Reject safety and shutter reads when the cached state is older than this value."
+  allow_open_without_safety_monitor:
+    name: Allow opening without safety monitor
+    description: "When disabled, OpenShutter is refused unless a safety monitor is linked."
+  safety_monitors:
+    name: Safety Monitors
+  device_number:
+    name: Device number
+    description: "Alpaca device index (0, 1, 2, …)."
+  name:
+    name: Name
+  description:
+    name: Description
+  unique_id:
+    name: Unique ID
+  entity:
+    name: Home Assistant entity
+    description: "e.g. binary_sensor.weather_safe"
+  safe_state:
+    name: Safe state
+    description: "Entity state that means conditions are safe (usually on)."
+  domes:
+    name: Domes / Roll-off Roofs
+  shutter_entity:
+    name: Shutter / cover entity
+    description: "Home Assistant cover entity for roof state."
+  safety_monitor_device_number:
+    name: Safety monitor device number
+    description: "Linked safety monitor index, or -1 for none."
+  open_service_domain:
+    name: Open service domain
+  open_service_service:
+    name: Open service name
+  close_service_domain:
+    name: Close service domain
+  close_service_service:
+    name: Close service name

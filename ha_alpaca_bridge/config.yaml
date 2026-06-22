@@ -1,0 +1,73 @@
+name: "HA Alpaca Bridge"
+version: "0.1.0"
+slug: ha_alpaca_bridge
+description: "Expose Home Assistant entities as ASCOM Alpaca SafetyMonitor and Dome devices for NINA, Voyager, and ASCOM Remote."
+url: "https://github.com/grm/ha-alpaca-bridge"
+arch:
+  - aarch64
+  - amd64
+  - armv7
+startup: application
+boot: auto
+init: false
+homeassistant: "2024.6.0"
+homeassistant_api: true
+hassio_api: false
+host_network: false
+ports:
+  11111/tcp: 11111
+map:
+  - type: addon_config
+    read_only: false
+
+options:
+  log_level: info
+  alpaca_port: 11111
+  alpaca_name: "Home Assistant Alpaca Bridge"
+  alpaca_location: ""
+  cache_enabled: true
+  cache_ttl_seconds: 5
+  homeassistant_timeout_seconds: 5
+  fail_safe_on_ha_error: true
+  fail_safe_on_unknown_state: true
+  max_state_age_seconds: 60
+  allow_open_without_safety_monitor: false
+  safety_monitors: []
+  domes: []
+
+schema:
+  log_level: list(debug|info|warning|error)
+  alpaca_port: port
+  alpaca_name: str
+  alpaca_location: str?
+  cache_enabled: bool
+  cache_ttl_seconds: int(0,300)
+  homeassistant_timeout_seconds: int(1,60)
+  fail_safe_on_ha_error: bool
+  fail_safe_on_unknown_state: bool
+  max_state_age_seconds: int(1,3600)
+  allow_open_without_safety_monitor: bool
+  safety_monitors:
+    name: Safety Monitors
+    type: list
+    items:
+      device_number: int
+      name: str
+      description: str?
+      unique_id: str
+      entity: str
+      safe_state: str
+  domes:
+    name: Domes / Roll-off Roofs
+    type: list
+    items:
+      device_number: int
+      name: str
+      description: str?
+      unique_id: str
+      shutter_entity: str
+      safety_monitor_device_number: int
+      open_service_domain: str
+      open_service_service: str
+      close_service_domain: str
+      close_service_service: str
