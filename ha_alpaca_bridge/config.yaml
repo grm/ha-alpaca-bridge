@@ -17,8 +17,7 @@ host_network: false
 ports:
   11111/tcp: 11111
 map:
-  - type: addon_config
-    read_only: false
+  - addon_config:rw
 
 options:
   log_level: info
@@ -48,20 +47,14 @@ schema:
   max_state_age_seconds: int(1,3600)
   allow_open_without_safety_monitor: bool
   safety_monitors:
-    name: Safety Monitors
-    type: list
-    items:
-      device_number: int
+    - device_number: int
       name: str
       description: str?
       unique_id: str
       entity: str
       safe_state: str
   domes:
-    name: Domes / Roll-off Roofs
-    type: list
-    items:
-      device_number: int
+    - device_number: int
       name: str
       description: str?
       unique_id: str

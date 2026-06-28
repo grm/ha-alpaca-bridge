@@ -33,34 +33,45 @@ configuration:
     description: "When disabled, OpenShutter is refused unless a safety monitor is linked."
   safety_monitors:
     name: Safety Monitors
-  device_number:
-    name: Device number
-    description: "Alpaca device index (0, 1, 2, …)."
-  name:
-    name: Name
-  description:
-    name: Description
-  unique_id:
-    name: Unique ID
-  entity:
-    name: Home Assistant entity
-    description: "e.g. binary_sensor.weather_safe"
-  safe_state:
-    name: Safe state
-    description: "Entity state that means conditions are safe (usually on)."
+    fields:
+      device_number:
+        name: Device number
+        description: "Alpaca device index (0, 1, 2, …)."
+      name:
+        name: Name
+      description:
+        name: Description
+      unique_id:
+        name: Unique ID
+      entity:
+        name: Home Assistant entity
+        description: "e.g. binary_sensor.weather_safe"
+      safe_state:
+        name: Safe state
+        description: "Entity state that means conditions are safe (usually on)."
   domes:
     name: Domes / Roll-off Roofs
-  shutter_entity:
-    name: Shutter / cover entity
-    description: "Home Assistant cover entity for roof state."
-  safety_monitor_device_number:
-    name: Safety monitor device number
-    description: "Linked safety monitor index, or -1 for none."
-  open_service_domain:
-    name: Open service domain
-  open_service_service:
-    name: Open service name
-  close_service_domain:
-    name: Close service domain
-  close_service_service:
-    name: Close service name
+    fields:
+      device_number:
+        name: Device number
+        description: "Alpaca device index (0, 1, 2, …)."
+      name:
+        name: Name
+      description:
+        name: Description
+      unique_id:
+        name: Unique ID
+      shutter_entity:
+        name: Shutter / cover entity
+        description: "Home Assistant cover entity for roof state."
+      safety_monitor_device_number:
+        name: Safety monitor device number
+        description: "Linked safety monitor index, or -1 for none."
+      open_service_domain:
+        name: Open service domain
+      open_service_service:
+        name: Open service name
+      close_service_domain:
+        name: Close service domain
+      close_service_service:
+        name: Close service name
