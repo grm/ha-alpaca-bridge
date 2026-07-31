@@ -41,9 +41,10 @@ def test_configured_devices(sample_config) -> None:
         response = client.get("/management/v1/configureddevices?ClientTransactionID=2")
         data = response.json()
         devices = data["Value"]
-        assert len(devices) == 4
+        assert len(devices) == 5
         types = {(d["DeviceType"], d["DeviceNumber"]) for d in devices}
         assert ("Dome", 0) in types
         assert ("Dome", 1) in types
         assert ("SafetyMonitor", 0) in types
         assert ("SafetyMonitor", 1) in types
+        assert ("ObservingConditions", 0) in types

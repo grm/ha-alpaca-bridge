@@ -75,3 +75,57 @@ configuration:
         name: Close service domain
       close_service_service:
         name: Close service name
+  observing_conditions:
+    name: Weather / Observing Conditions
+    fields:
+      device_number:
+        name: Device number
+        description: "Alpaca device index (0, 1, 2, …)."
+      name:
+        name: Name
+      description:
+        name: Description
+      unique_id:
+        name: Unique ID
+      temperature_entity:
+        name: Temperature entity
+        description: "HA sensor in °C (leave empty if unused)."
+      humidity_entity:
+        name: Humidity entity
+        description: "HA sensor in % (0–100)."
+      pressure_entity:
+        name: Pressure entity
+        description: "HA sensor in hPa."
+      rain_rate_entity:
+        name: Rain rate entity
+        description: "HA sensor in mm/h."
+      wind_speed_entity:
+        name: Wind speed entity
+        description: "HA sensor in m/s."
+      wind_direction_entity:
+        name: Wind direction entity
+        description: "HA sensor in degrees (0–360)."
+      wind_gust_entity:
+        name: Wind gust entity
+        description: "HA sensor in m/s."
+      cloud_cover_entity:
+        name: Cloud cover entity
+        description: "HA sensor in % (0–100)."
+      dew_point_entity:
+        name: Dew point entity
+        description: "HA sensor in °C."
+      sky_brightness_entity:
+        name: Sky brightness entity
+        description: "HA sensor in Lux."
+      sky_quality_entity:
+        name: Sky quality entity
+        description: "HA sensor in mag/arcsec²."
+      sky_temperature_entity:
+        name: Sky temperature entity
+        description: "HA sensor in °C."
+      star_fwhm_entity:
+        name: Star FWHM entity
+        description: "HA sensor in arc-seconds."
+      average_period:
+        name: Average period (seconds)
+        description: "ASCOM AveragePeriod; 0 means instantaneous HA values."

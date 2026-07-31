@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Home Assistant **add-on only**. Exposes local HA entities as ASCOM Alpaca `SafetyMonitor` and `Dome` (shutter/roof MVP).
+Home Assistant **add-on only**. Exposes local HA entities as ASCOM Alpaca `SafetyMonitor`, `Dome` (shutter/roof MVP), and `ObservingConditions`.
 
 ## Structure
 

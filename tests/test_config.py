@@ -20,6 +20,11 @@ def test_addon_options_build_valid_config(addon_options) -> None:
     assert config.cache.ttl_seconds == 5
     assert len(config.devices.safety_monitors) == 2
     assert len(config.devices.domes) == 2
+    assert len(config.devices.observing_conditions) == 1
+    assert config.devices.observing_conditions[0].temperature_entity == (
+        "sensor.weather_temperature"
+    )
+    assert config.devices.observing_conditions[0].cloud_cover_entity is None
 
 
 def test_duplicate_safety_monitor_device_number(addon_options_copy) -> None:

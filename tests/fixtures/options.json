@@ -53,5 +53,27 @@
       "close_service_domain": "cover",
       "close_service_service": "close_cover"
     }
+  ],
+  "observing_conditions": [
+    {
+      "device_number": 0,
+      "name": "Main Weather Station",
+      "description": "Main observatory weather sensors",
+      "unique_id": "main-weather-station",
+      "temperature_entity": "sensor.weather_temperature",
+      "humidity_entity": "sensor.weather_humidity",
+      "pressure_entity": "sensor.weather_pressure",
+      "rain_rate_entity": "sensor.weather_rain_rate",
+      "wind_speed_entity": "sensor.weather_wind_speed",
+      "wind_direction_entity": "",
+      "wind_gust_entity": "",
+      "cloud_cover_entity": "",
+      "dew_point_entity": "",
+      "sky_brightness_entity": "",
+      "sky_quality_entity": "",
+      "sky_temperature_entity": "",
+      "star_fwhm_entity": "",
+      "average_period": 0
+    }
   ]
 }

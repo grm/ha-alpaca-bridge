@@ -1,6 +1,6 @@
 # ha-alpaca-bridge
 
-Home Assistant add-on that exposes observatory entities as **ASCOM Alpaca** `SafetyMonitor` and `Dome` devices for NINA, Voyager, ASCOM Remote, and other Alpaca clients.
+Home Assistant add-on that exposes observatory entities as **ASCOM Alpaca** `SafetyMonitor`, `Dome`, and `ObservingConditions` devices for NINA, Voyager, ASCOM Remote, and other Alpaca clients.
 
 ```
 NINA / ASCOM Alpaca client
@@ -9,7 +9,7 @@ NINA / ASCOM Alpaca client
 HA Alpaca Bridge add-on (inside Home Assistant)
         |
         v
-Home Assistant entities (binary_sensor, cover, services)
+Home Assistant entities (binary_sensor, cover, sensors, services)
 ```
 
 ## Install
@@ -62,14 +62,15 @@ All settings are managed from the add-on **Configuration** tab:
 | Safety | fail-safe rules, `max_state_age_seconds` |
 | Safety monitors | List of weather/safety entities |
 | Domes | List of roof/shutter devices |
+| Observing conditions | Weather station sensors for NINA Weather |
 
 See `ha_alpaca_bridge/DOCS.md` for field details.
 
 ## MVP scope
 
-**Supported:** Management API, `SafetyMonitor`, `Dome` (shutter/roof), status cache, fail-safe behaviour.
+**Supported:** Management API, `SafetyMonitor`, `Dome` (shutter/roof), `ObservingConditions`, status cache, fail-safe behaviour.
 
-**Not supported:** rotating dome, `ObservingConditions`, external Home Assistant instances.
+**Not supported:** rotating dome, external Home Assistant instances.
 
 ## Development
 
@@ -85,8 +86,8 @@ Tests use `tests/fixtures/options.json` (same format as `/data/options.json` in 
 | Situation | Behaviour |
 |-----------|-----------|
 | Home Assistant unreachable | `Connected=false`, `IsSafe=false` |
-| Unknown / unavailable state | `IsSafe=false`, `ShutterStatus=error` |
-| Stale cached state | `IsSafe=false`, `ShutterStatus=error` |
+| Unknown / unavailable state | `IsSafe=false`, `ShutterStatus=error`, weather sensor error |
+| Stale cached state | `IsSafe=false`, `ShutterStatus=error`, weather sensor error |
 | Unsafe weather | `OpenShutter` refused |
 | No safety monitor (default) | `OpenShutter` refused |
 | Unsafe weather | `CloseShutter` still allowed |

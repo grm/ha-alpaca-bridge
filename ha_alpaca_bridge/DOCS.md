@@ -1,6 +1,6 @@
 # Home Assistant Add-on
 
-Expose Home Assistant weather and roof entities as ASCOM Alpaca `SafetyMonitor` and `Dome` devices.
+Expose Home Assistant weather and roof entities as ASCOM Alpaca `SafetyMonitor`, `Dome`, and `ObservingConditions` devices.
 
 ## Configuration
 
@@ -28,6 +28,29 @@ Map a `cover` entity to Alpaca shutter control:
 | safety_monitor_device_number | Linked monitor (`-1` = none) |
 | open/close service | Defaults to `cover.open_cover` / `cover.close_cover` |
 
+### Weather / Observing Conditions
+
+Map Home Assistant numeric sensors to ASCOM `ObservingConditions` (NINA **Weather** tab). Leave a field empty to mark that sensor as not implemented.
+
+| Field | ASCOM property | Expected units |
+|-------|----------------|----------------|
+| temperature_entity | Temperature | °C |
+| humidity_entity | Humidity | % |
+| pressure_entity | Pressure | hPa |
+| rain_rate_entity | RainRate | mm/h |
+| wind_speed_entity | WindSpeed | m/s |
+| wind_direction_entity | WindDirection | degrees |
+| wind_gust_entity | WindGust | m/s |
+| cloud_cover_entity | CloudCover | % |
+| dew_point_entity | DewPoint | °C |
+| sky_brightness_entity | SkyBrightness | Lux |
+| sky_quality_entity | SkyQuality | mag/arcsec² |
+| sky_temperature_entity | SkyTemperature | °C |
+| star_fwhm_entity | StarFWHM | arcsec |
+| average_period | AveragePeriod | seconds (`0` = instantaneous) |
+
+Values are passed through from Home Assistant as floats. Configure HA sensors in the units above (or convert with template sensors).
+
 ## Connecting clients
 
 Point ASCOM Alpaca clients to:
@@ -38,9 +61,15 @@ http://<home-assistant-host>:11111
 
 Use the host IP of your Home Assistant machine and the configured Alpaca port.
 
+In NINA:
+
+- **Safety Monitor** → bridge SafetyMonitor
+- **Dome** → bridge Dome
+- **Weather** → bridge ObservingConditions
+
 ## Fail-safe behaviour
 
 - Home Assistant unreachable → unsafe / not connected
-- Unknown or stale states → unsafe / shutter error
+- Unknown or stale states → unsafe / shutter error / ObservingConditions invalid operation
 - `OpenShutter` blocked when unsafe
 - `CloseShutter` always allowed when Home Assistant is reachable

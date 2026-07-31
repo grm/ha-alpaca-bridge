@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 
 from alpaca_bridge.alpaca.devices.base import BaseAlpacaDevice, DeviceContext
 from alpaca_bridge.alpaca.devices.dome import DomeDevice
+from alpaca_bridge.alpaca.devices.observing_conditions import ObservingConditionsDevice
 from alpaca_bridge.alpaca.devices.safety_monitor import SafetyMonitorDevice
 from alpaca_bridge.config import AppConfig
 from alpaca_bridge.homeassistant.client import HomeAssistantPool
@@ -17,6 +18,7 @@ class DeviceRegistry:
     ha_pool: HomeAssistantPool
     safety_monitors: dict[int, SafetyMonitorDevice] = field(default_factory=dict)
     domes: dict[int, DomeDevice] = field(default_factory=dict)
+    observing_conditions: dict[int, ObservingConditionsDevice] = field(default_factory=dict)
     _contexts: dict[tuple[str, int], DeviceContext] = field(default_factory=dict)
 
     @classmethod
@@ -33,6 +35,12 @@ class DeviceRegistry:
             ctx = registry._context_for("dome", dome_cfg.device_number)
             registry.domes[dome_cfg.device_number] = DomeDevice(
                 dome_cfg, ctx, registry.safety_monitors
+            )
+
+        for oc_cfg in config.devices.observing_conditions:
+            ctx = registry._context_for("observingconditions", oc_cfg.device_number)
+            registry.observing_conditions[oc_cfg.device_number] = ObservingConditionsDevice(
+                oc_cfg, ctx
             )
 
         return registry
@@ -55,12 +63,20 @@ class DeviceRegistry:
                 return self.domes[device_number]
             except KeyError as exc:
                 raise KeyError(f"Unknown dome device number {device_number}") from exc
+        if device_type == "observingconditions":
+            try:
+                return self.observing_conditions[device_number]
+            except KeyError as exc:
+                raise KeyError(
+                    f"Unknown observingconditions device number {device_number}"
+                ) from exc
         raise KeyError(f"Unsupported device type '{device_type}'")
 
     def configured_devices(self) -> list[dict]:
         devices: list[BaseAlpacaDevice] = [
             *self.safety_monitors.values(),
             *self.domes.values(),
+            *self.observing_conditions.values(),
         ]
         devices.sort(key=lambda d: (d.alpaca_device_type, d.device_number))
         return [device.configured_device_entry() for device in devices]

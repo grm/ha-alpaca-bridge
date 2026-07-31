@@ -1,7 +1,7 @@
 name: "HA Alpaca Bridge"
-version: "0.1.0"
+version: "0.2.0"
 slug: ha_alpaca_bridge
-description: "Expose Home Assistant entities as ASCOM Alpaca SafetyMonitor and Dome devices for NINA, Voyager, and ASCOM Remote."
+description: "Expose Home Assistant entities as ASCOM Alpaca SafetyMonitor, Dome, and ObservingConditions devices for NINA, Voyager, and ASCOM Remote."
 url: "https://github.com/grm/ha-alpaca-bridge"
 arch:
   - aarch64
@@ -33,6 +33,7 @@ options:
   allow_open_without_safety_monitor: false
   safety_monitors: []
   domes: []
+  observing_conditions: []
 
 schema:
   log_level: list(debug|info|warning|error)
@@ -64,3 +65,22 @@ schema:
       open_service_service: str
       close_service_domain: str
       close_service_service: str
+  observing_conditions:
+    - device_number: int
+      name: str
+      description: str?
+      unique_id: str
+      temperature_entity: str?
+      humidity_entity: str?
+      pressure_entity: str?
+      rain_rate_entity: str?
+      wind_speed_entity: str?
+      wind_direction_entity: str?
+      wind_gust_entity: str?
+      cloud_cover_entity: str?
+      dew_point_entity: str?
+      sky_brightness_entity: str?
+      sky_quality_entity: str?
+      sky_temperature_entity: str?
+      star_fwhm_entity: str?
+      average_period: float?

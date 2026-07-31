@@ -12,6 +12,10 @@ from fastapi.responses import JSONResponse
 from alpaca_bridge.alpaca import errors
 from alpaca_bridge.alpaca.devices.base import BaseAlpacaDevice
 from alpaca_bridge.alpaca.devices.dome import DomeDevice, DomeSafetyError
+from alpaca_bridge.alpaca.devices.observing_conditions import (
+    ObservingConditionsDevice,
+    ObservingConditionsError,
+)
 from alpaca_bridge.alpaca.devices.registry import DeviceRegistry
 from alpaca_bridge.alpaca.devices.safety_monitor import SafetyMonitorDevice
 from alpaca_bridge.alpaca.responses import error_response, method_success_response, success_response
@@ -58,6 +62,32 @@ _UNSUPPORTED_DOME_BOOL_PROPERTIES = frozenset(
     }
 )
 
+_OC_SENSOR_PROPERTIES = frozenset(
+    {
+        "cloudcover",
+        "dewpoint",
+        "humidity",
+        "pressure",
+        "rainrate",
+        "skybrightness",
+        "skyquality",
+        "skytemperature",
+        "starfwhm",
+        "temperature",
+        "winddirection",
+        "windgust",
+        "windspeed",
+    }
+)
+
+_OC_READ_PROPERTIES = _COMMON_READ_PROPERTIES | _OC_SENSOR_PROPERTIES | {
+    "averageperiod",
+    "timesincelastupdate",
+    "sensordescription",
+}
+
+_OC_METHODS = frozenset({"refresh", "averageperiod"})
+
 
 def parse_transaction_context(request: Request, body: dict[str, Any] | None = None) -> TransactionContext:
     query = parse_qs(str(request.url.query), keep_blank_values=True)
@@ -84,6 +114,18 @@ def _first_int(values: list[str] | None, *, default: int) -> int:
         return default
 
 
+def _sensor_name_from_request(request: Request, body: dict[str, Any] | None) -> str:
+    query = parse_qs(str(request.url.query), keep_blank_values=True)
+    values = query.get("SensorName") or query.get("sensorname")
+    if values is not None:
+        return values[0]
+    if body:
+        raw = body.get("SensorName", body.get("sensorname"))
+        if raw is not None:
+            return str(raw)
+    return ""
+
+
 async def parse_put_body(request: Request) -> dict[str, Any]:
     content_type = request.headers.get("content-type", "")
     if "application/json" in content_type:
@@ -103,6 +145,8 @@ def _coerce_form_value(value: Any) -> Any:
         if lower == "false":
             return False
         try:
+            if "." in value:
+                return float(value)
             return int(value)
         except ValueError:
             return value
@@ -143,6 +187,7 @@ def create_device_router(registry: DeviceRegistry, transaction_manager: Transact
 
         try:
             payload = await _dispatch(
+                request,
                 request.method,
                 device_type.lower(),
                 command_lower,
@@ -152,7 +197,7 @@ def create_device_router(registry: DeviceRegistry, transaction_manager: Transact
                 server_tx,
             )
             return JSONResponse(payload, status_code=200)
-        except DomeSafetyError as exc:
+        except (DomeSafetyError, ObservingConditionsError) as exc:
             return JSONResponse(
                 error_response(
                     error_number=exc.error_number,
@@ -187,6 +232,7 @@ def create_device_router(registry: DeviceRegistry, transaction_manager: Transact
 
 
 async def _dispatch(
+    request: Request,
     method: str,
     device_type: str,
     command: str,
@@ -199,12 +245,16 @@ async def _dispatch(
         return await _handle_connected(method, device, body, tx, server_tx)
 
     if method == "PUT":
-        return await _handle_put_method(device_type, command, device, tx, server_tx)
+        return await _handle_put_method(device_type, command, device, body, tx, server_tx)
 
     if device_type == "safetymonitor":
         return await _handle_safety_monitor_get(command, device, tx, server_tx)
     if device_type == "dome":
         return await _handle_dome_get(command, device, tx, server_tx)
+    if device_type == "observingconditions":
+        return await _handle_observing_conditions_get(
+            request, command, device, body, tx, server_tx
+        )
 
     raise NotImplementedError(f"Unsupported device type '{device_type}'")
 
@@ -241,22 +291,41 @@ async def _handle_put_method(
     device_type: str,
     command: str,
     device: BaseAlpacaDevice,
+    body: dict[str, Any] | None,
     tx: TransactionContext,
     server_tx: int,
 ) -> dict[str, Any]:
-    if device_type != "dome" or command not in _DOME_METHODS:
-        raise NotImplementedError(f"PUT {command} is not implemented")
+    if device_type == "dome" and command in _DOME_METHODS:
+        assert isinstance(device, DomeDevice)
+        if command == "openshutter":
+            await device.open_shutter()
+        elif command == "closeshutter":
+            await device.close_shutter()
+        return method_success_response(
+            client_transaction_id=tx.client_transaction_id,
+            server_transaction_id=server_tx,
+        )
 
-    assert isinstance(device, DomeDevice)
-    if command == "openshutter":
-        await device.open_shutter()
-    elif command == "closeshutter":
-        await device.close_shutter()
+    if device_type == "observingconditions" and command in _OC_METHODS:
+        assert isinstance(device, ObservingConditionsDevice)
+        if command == "refresh":
+            await device.refresh()
+        elif command == "averageperiod":
+            if body is None or (
+                body.get("AveragePeriod") is None and body.get("averageperiod") is None
+            ):
+                raise ObservingConditionsError(
+                    "PUT averageperiod requires AveragePeriod parameter",
+                    errors.INVALID_VALUE,
+                )
+            raw = body.get("AveragePeriod", body.get("averageperiod"))
+            device.set_average_period(float(raw))
+        return method_success_response(
+            client_transaction_id=tx.client_transaction_id,
+            server_transaction_id=server_tx,
+        )
 
-    return method_success_response(
-        client_transaction_id=tx.client_transaction_id,
-        server_transaction_id=server_tx,
-    )
+    raise NotImplementedError(f"PUT {command} is not implemented")
 
 
 async def _handle_safety_monitor_get(
@@ -300,6 +369,40 @@ async def _handle_dome_get(
         value = (await device.get_shutter_status()).value
     else:
         value = await _read_common_or_specific(command, device)
+
+    return success_response(
+        value,
+        client_transaction_id=tx.client_transaction_id,
+        server_transaction_id=server_tx,
+    )
+
+
+async def _handle_observing_conditions_get(
+    request: Request,
+    command: str,
+    device: BaseAlpacaDevice,
+    body: dict[str, Any] | None,
+    tx: TransactionContext,
+    server_tx: int,
+) -> dict[str, Any]:
+    if command not in _OC_READ_PROPERTIES:
+        raise NotImplementedError(
+            f"Property '{command}' is not implemented for ObservingConditions"
+        )
+
+    assert isinstance(device, ObservingConditionsDevice)
+    if command in _COMMON_READ_PROPERTIES:
+        value: Any = await _read_common_or_specific(command, device)
+    elif command == "averageperiod":
+        value = device.get_average_period()
+    elif command == "timesincelastupdate":
+        value = await device.get_time_since_last_update(
+            _sensor_name_from_request(request, body)
+        )
+    elif command == "sensordescription":
+        value = device.get_sensor_description(_sensor_name_from_request(request, body))
+    else:
+        value = await device.get_sensor_value(command)
 
     return success_response(
         value,

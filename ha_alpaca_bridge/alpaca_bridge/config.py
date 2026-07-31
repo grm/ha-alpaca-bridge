@@ -18,7 +18,7 @@ class ServerConfig(BaseModel):
     port: int = 11111
     name: str = "Home Assistant Alpaca Bridge"
     manufacturer: str = "ha-alpaca-bridge"
-    version: str = "0.1.0"
+    version: str = "0.2.0"
     location: str = ""
 
 
@@ -82,9 +82,68 @@ class DomeDeviceConfig(BaseModel):
     close_service: ServiceCallConfig | None = None
 
 
+class ObservingConditionsDeviceConfig(BaseModel):
+    """Map optional Home Assistant sensors to ASCOM ObservingConditions properties."""
+
+    device_number: int = Field(ge=0)
+    name: str
+    description: str
+    unique_id: str
+    temperature_entity: str | None = None
+    humidity_entity: str | None = None
+    pressure_entity: str | None = None
+    rain_rate_entity: str | None = None
+    wind_speed_entity: str | None = None
+    wind_direction_entity: str | None = None
+    wind_gust_entity: str | None = None
+    cloud_cover_entity: str | None = None
+    dew_point_entity: str | None = None
+    sky_brightness_entity: str | None = None
+    sky_quality_entity: str | None = None
+    sky_temperature_entity: str | None = None
+    star_fwhm_entity: str | None = None
+    average_period: float = Field(default=0.0, ge=0.0)
+
+    def entity_for_sensor(self, sensor_name: str) -> str | None:
+        """Return the configured HA entity for an ASCOM sensor name, if any."""
+        attr = OC_SENSOR_ATTRS.get(sensor_name.lower())
+        if attr is None:
+            return None
+        entity = getattr(self, attr)
+        return entity or None
+
+    def configured_entities(self) -> dict[str, str]:
+        """Return ASCOM sensor name → HA entity for all mapped sensors."""
+        mapping: dict[str, str] = {}
+        for sensor_name, attr in OC_SENSOR_ATTRS.items():
+            entity = getattr(self, attr)
+            if entity:
+                mapping[sensor_name] = entity
+        return mapping
+
+
+# ASCOM ObservingConditions sensor names → config attribute holding the HA entity id.
+OC_SENSOR_ATTRS: dict[str, str] = {
+    "cloudcover": "cloud_cover_entity",
+    "dewpoint": "dew_point_entity",
+    "humidity": "humidity_entity",
+    "pressure": "pressure_entity",
+    "rainrate": "rain_rate_entity",
+    "skybrightness": "sky_brightness_entity",
+    "skyquality": "sky_quality_entity",
+    "skytemperature": "sky_temperature_entity",
+    "starfwhm": "star_fwhm_entity",
+    "temperature": "temperature_entity",
+    "winddirection": "wind_direction_entity",
+    "windgust": "wind_gust_entity",
+    "windspeed": "wind_speed_entity",
+}
+
+
 class DevicesConfig(BaseModel):
     safety_monitors: list[SafetyMonitorDeviceConfig] = Field(default_factory=list)
     domes: list[DomeDeviceConfig] = Field(default_factory=list)
+    observing_conditions: list[ObservingConditionsDeviceConfig] = Field(default_factory=list)
 
 
 class HomeAssistantConfig(BaseModel):
@@ -104,6 +163,11 @@ class AppConfig(BaseModel):
             self.devices.safety_monitors, "safety_monitors", lambda d: d.device_number
         )
         _check_unique_device_numbers(self.devices.domes, "domes", lambda d: d.device_number)
+        _check_unique_device_numbers(
+            self.devices.observing_conditions,
+            "observing_conditions",
+            lambda d: d.device_number,
+        )
 
         safety_numbers = {sm.device_number for sm in self.devices.safety_monitors}
 
@@ -197,6 +261,30 @@ def app_config_from_addon_options(
             )
         )
 
+    observing_conditions = [
+        ObservingConditionsDeviceConfig(
+            device_number=item["device_number"],
+            name=item["name"],
+            description=item.get("description") or item["name"],
+            unique_id=item["unique_id"],
+            temperature_entity=_optional_entity(item.get("temperature_entity")),
+            humidity_entity=_optional_entity(item.get("humidity_entity")),
+            pressure_entity=_optional_entity(item.get("pressure_entity")),
+            rain_rate_entity=_optional_entity(item.get("rain_rate_entity")),
+            wind_speed_entity=_optional_entity(item.get("wind_speed_entity")),
+            wind_direction_entity=_optional_entity(item.get("wind_direction_entity")),
+            wind_gust_entity=_optional_entity(item.get("wind_gust_entity")),
+            cloud_cover_entity=_optional_entity(item.get("cloud_cover_entity")),
+            dew_point_entity=_optional_entity(item.get("dew_point_entity")),
+            sky_brightness_entity=_optional_entity(item.get("sky_brightness_entity")),
+            sky_quality_entity=_optional_entity(item.get("sky_quality_entity")),
+            sky_temperature_entity=_optional_entity(item.get("sky_temperature_entity")),
+            star_fwhm_entity=_optional_entity(item.get("star_fwhm_entity")),
+            average_period=float(item.get("average_period", 0) or 0),
+        )
+        for item in options.get("observing_conditions", [])
+    ]
+
     return AppConfig(
         server=ServerConfig(
             port=int(options.get("alpaca_port", 11111)),
@@ -222,5 +310,16 @@ def app_config_from_addon_options(
                 options.get("allow_open_without_safety_monitor", False)
             ),
         ),
-        devices=DevicesConfig(safety_monitors=safety_monitors, domes=domes),
+        devices=DevicesConfig(
+            safety_monitors=safety_monitors,
+            domes=domes,
+            observing_conditions=observing_conditions,
+        ),
     )
+
+
+def _optional_entity(value: Any) -> str | None:
+    if value is None:
+        return None
+    text = str(value).strip()
+    return text or None
