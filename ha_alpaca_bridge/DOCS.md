@@ -73,6 +73,12 @@ This option is **off by default**. Only enable it on a trusted local network,
 since any device able to reach that UDP port can learn the Alpaca server
 address.
 
+This add-on runs with **host networking** so it can receive discovery
+broadcasts (Docker's default bridge network blocks UDP broadcast/multicast
+traffic from the LAN, which would silently break discovery). As a result, the
+add-on binds directly to the configured `alpaca_port` on the Home Assistant
+host — there is no separate Docker port mapping to configure.
+
 In NINA:
 
 - **Safety Monitor** → bridge SafetyMonitor

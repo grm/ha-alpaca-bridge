@@ -18,7 +18,7 @@ class ServerConfig(BaseModel):
     port: int = 11111
     name: str = "Home Assistant Alpaca Bridge"
     manufacturer: str = "ha-alpaca-bridge"
-    version: str = "0.3.0"
+    version: str = "0.3.1"
     location: str = ""
     discovery_enabled: bool = False
 

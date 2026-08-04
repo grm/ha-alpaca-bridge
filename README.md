@@ -31,6 +31,10 @@ Point Alpaca clients to:
 http://<home-assistant-host>:11111
 ```
 
+> The add-on runs with **host networking** (required for UDP broadcast
+> discovery to work — see below), so it binds directly to the configured
+> `alpaca_port` on the Home Assistant host.
+
 ## Project structure
 
 ```text
@@ -58,7 +62,7 @@ All settings are managed from the add-on **Configuration** tab:
 | Section | Purpose |
 |---------|---------|
 | Alpaca port / name | Server identity for clients |
-| Network discovery | `alpaca_discovery_enabled` (off by default) — responds to Alpaca UDP broadcast discovery on port 32227 |
+| Network discovery | `alpaca_discovery_enabled` (off by default) — responds to Alpaca UDP broadcast discovery on port 32227. Requires host networking, since Docker's bridge network blocks broadcast traffic. |
 | Status cache | `cache_enabled`, `cache_ttl_seconds` |
 | Safety | fail-safe rules, `max_state_age_seconds` |
 | Safety monitors | List of weather/safety entities |
