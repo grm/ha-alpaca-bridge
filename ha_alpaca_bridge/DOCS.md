@@ -61,6 +61,18 @@ http://<home-assistant-host>:11111
 
 Use the host IP of your Home Assistant machine and the configured Alpaca port.
 
+### Network discovery (optional)
+
+By default, clients must be configured manually with the host and port above.
+Enabling **Enable network discovery** (`alpaca_discovery_enabled`) makes the
+add-on respond to Alpaca's UDP broadcast discovery protocol (port 32227), so
+compatible clients (NINA, ASCOM Remote, ...) can find it automatically on the
+local network.
+
+This option is **off by default**. Only enable it on a trusted local network,
+since any device able to reach that UDP port can learn the Alpaca server
+address.
+
 In NINA:
 
 - **Safety Monitor** → bridge SafetyMonitor

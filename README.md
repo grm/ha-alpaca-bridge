@@ -58,6 +58,7 @@ All settings are managed from the add-on **Configuration** tab:
 | Section | Purpose |
 |---------|---------|
 | Alpaca port / name | Server identity for clients |
+| Network discovery | `alpaca_discovery_enabled` (off by default) — responds to Alpaca UDP broadcast discovery on port 32227 |
 | Status cache | `cache_enabled`, `cache_ttl_seconds` |
 | Safety | fail-safe rules, `max_state_age_seconds` |
 | Safety monitors | List of weather/safety entities |

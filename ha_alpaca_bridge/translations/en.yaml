@@ -11,6 +11,9 @@ configuration:
   alpaca_location:
     name: Observatory location
     description: "Optional location string returned by the Alpaca management API."
+  alpaca_discovery_enabled:
+    name: Enable network discovery
+    description: "Broadcasts on UDP port 32227 so Alpaca clients can auto-detect this server on the local network. Disabled by default; enable only on trusted networks."
   cache_enabled:
     name: Enable status cache
     description: "Cache Home Assistant entity states to reduce API load."

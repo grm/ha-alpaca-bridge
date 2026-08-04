@@ -18,8 +18,9 @@ class ServerConfig(BaseModel):
     port: int = 11111
     name: str = "Home Assistant Alpaca Bridge"
     manufacturer: str = "ha-alpaca-bridge"
-    version: str = "0.2.0"
+    version: str = "0.3.0"
     location: str = ""
+    discovery_enabled: bool = False
 
 
 class CacheConfig(BaseModel):
@@ -290,6 +291,7 @@ def app_config_from_addon_options(
             port=int(options.get("alpaca_port", 11111)),
             name=str(options.get("alpaca_name", "Home Assistant Alpaca Bridge")),
             location=str(options.get("alpaca_location", "")),
+            discovery_enabled=bool(options.get("alpaca_discovery_enabled", False)),
         ),
         cache=CacheConfig(
             enabled=bool(options.get("cache_enabled", True)),
