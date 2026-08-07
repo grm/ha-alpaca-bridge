@@ -34,6 +34,9 @@ configuration:
   allow_open_without_safety_monitor:
     name: Allow opening without safety monitor
     description: "When disabled, OpenShutter is refused unless a safety monitor is linked."
+  disable_shutter_control:
+    name: Disable shutter control
+    description: "Centrally block OpenShutter and CloseShutter for all domes/roofs: the add-on refuses the ASCOM request and never calls the underlying Home Assistant service. Useful for maintenance or to force manual-only roof control."
   safety_monitors:
     name: Safety Monitors
     fields:

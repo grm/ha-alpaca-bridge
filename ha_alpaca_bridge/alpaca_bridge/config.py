@@ -18,7 +18,7 @@ class ServerConfig(BaseModel):
     port: int = 11111
     name: str = "Home Assistant Alpaca Bridge"
     manufacturer: str = "ha-alpaca-bridge"
-    version: str = "0.3.1"
+    version: str = "0.4.0"
     location: str = ""
     discovery_enabled: bool = False
 
@@ -45,6 +45,7 @@ class SafetyConfig(BaseModel):
     fail_safe_on_unknown_state: bool = True
     max_state_age_seconds: float = Field(default=60.0, ge=0.0)
     allow_open_without_safety_monitor: bool = False
+    disable_shutter_control: bool = False
 
 
 class SafetyMonitorRef(BaseModel):
@@ -311,6 +312,7 @@ def app_config_from_addon_options(
             allow_open_without_safety_monitor=bool(
                 options.get("allow_open_without_safety_monitor", False)
             ),
+            disable_shutter_control=bool(options.get("disable_shutter_control", False)),
         ),
         devices=DevicesConfig(
             safety_monitors=safety_monitors,

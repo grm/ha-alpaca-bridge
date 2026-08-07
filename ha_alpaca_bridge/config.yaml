@@ -1,5 +1,5 @@
 name: "HA Alpaca Bridge"
-version: "0.3.1"
+version: "0.4.0"
 slug: ha_alpaca_bridge
 description: "Expose Home Assistant entities as ASCOM Alpaca SafetyMonitor, Dome, and ObservingConditions devices for NINA, Voyager, and ASCOM Remote."
 url: "https://github.com/grm/ha-alpaca-bridge"
@@ -30,6 +30,7 @@ options:
   fail_safe_on_unknown_state: true
   max_state_age_seconds: 60
   allow_open_without_safety_monitor: false
+  disable_shutter_control: false
   safety_monitors: []
   domes: []
   observing_conditions: []
@@ -47,6 +48,7 @@ schema:
   fail_safe_on_unknown_state: bool
   max_state_age_seconds: int(1,3600)
   allow_open_without_safety_monitor: bool
+  disable_shutter_control: bool
   safety_monitors:
     - device_number: int
       name: str

@@ -28,6 +28,12 @@ Map a `cover` entity to Alpaca shutter control:
 | safety_monitor_device_number | Linked monitor (`-1` = none) |
 | open/close service | Defaults to `cover.open_cover` / `cover.close_cover` |
 
+**Disable shutter control** (`disable_shutter_control`, off by default): when
+enabled, the add-on refuses every `OpenShutter` and `CloseShutter` request for
+**all** domes/roofs — the request never reaches Home Assistant. Use this as a
+centralized kill switch (e.g. during maintenance or to force manual-only roof
+control) without having to edit or remove each dome's configuration.
+
 ### Weather / Observing Conditions
 
 Map Home Assistant numeric sensors to ASCOM `ObservingConditions` (NINA **Weather** tab). Leave a field empty to mark that sensor as not implemented.
@@ -91,3 +97,4 @@ In NINA:
 - Unknown or stale states → unsafe / shutter error / ObservingConditions invalid operation
 - `OpenShutter` blocked when unsafe
 - `CloseShutter` always allowed when Home Assistant is reachable
+- `OpenShutter` and `CloseShutter` both blocked when `disable_shutter_control` is enabled

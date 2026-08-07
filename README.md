@@ -64,7 +64,7 @@ All settings are managed from the add-on **Configuration** tab:
 | Alpaca port / name | Server identity for clients |
 | Network discovery | `alpaca_discovery_enabled` (off by default) — responds to Alpaca UDP broadcast discovery on port 32227. Requires host networking, since Docker's bridge network blocks broadcast traffic. |
 | Status cache | `cache_enabled`, `cache_ttl_seconds` |
-| Safety | fail-safe rules, `max_state_age_seconds` |
+| Safety | fail-safe rules, `max_state_age_seconds`, `disable_shutter_control` (centrally block OpenShutter/CloseShutter for all domes) |
 | Safety monitors | List of weather/safety entities |
 | Domes | List of roof/shutter devices |
 | Observing conditions | Weather station sensors for NINA Weather |
@@ -96,6 +96,7 @@ Tests use `tests/fixtures/options.json` (same format as `/data/options.json` in 
 | Unsafe weather | `OpenShutter` refused |
 | No safety monitor (default) | `OpenShutter` refused |
 | Unsafe weather | `CloseShutter` still allowed |
+| `disable_shutter_control` enabled | `OpenShutter` and `CloseShutter` both refused for every dome |
 
 ## License
 

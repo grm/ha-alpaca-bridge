@@ -108,6 +108,76 @@ def test_open_shutter_refused_when_unsafe(sample_config) -> None:
         assert "unsafe" in data["ErrorMessage"].lower()
 
 
+def test_open_shutter_refused_when_control_disabled(sample_config) -> None:
+    cfg = sample_config.model_copy(deep=True)
+    cfg.safety.disable_shutter_control = True
+    with respx.mock(assert_all_mocked=False, assert_all_called=False) as router:
+        mock_ha(
+            router,
+            cfg,
+            states={
+                "binary_sensor.weather_safe": "on",
+                "cover.observatory_roof": "closed",
+            },
+        )
+        client = TestClient(create_app(cfg))
+        response = client.put(
+            "/api/v1/dome/0/openshutter",
+            data={"ClientID": 1, "ClientTransactionID": 11},
+        )
+        data = response.json()
+        assert data["ErrorNumber"] == errors.INVALID_OPERATION
+        assert "disabled" in data["ErrorMessage"].lower()
+        service_calls = [
+            call.request.url.path
+            for call in router.calls
+            if call.request.method == "POST"
+        ]
+        assert "/api/services/cover/open_cover" not in service_calls
+
+
+def test_close_shutter_refused_when_control_disabled(sample_config) -> None:
+    cfg = sample_config.model_copy(deep=True)
+    cfg.safety.disable_shutter_control = True
+    with respx.mock(assert_all_mocked=False, assert_all_called=False) as router:
+        mock_ha(
+            router,
+            cfg,
+            states={
+                "binary_sensor.weather_safe": "off",
+                "cover.observatory_roof": "open",
+            },
+        )
+        client = TestClient(create_app(cfg))
+        response = client.put(
+            "/api/v1/dome/0/closeshutter",
+            data={"ClientID": 1, "ClientTransactionID": 12},
+        )
+        data = response.json()
+        assert data["ErrorNumber"] == errors.INVALID_OPERATION
+        assert "disabled" in data["ErrorMessage"].lower()
+        service_calls = [
+            call.request.url.path
+            for call in router.calls
+            if call.request.method == "POST"
+        ]
+        assert "/api/services/cover/close_cover" not in service_calls
+
+
+@pytest.mark.asyncio
+async def test_shutter_status_still_readable_when_control_disabled(sample_config) -> None:
+    cfg = sample_config.model_copy(deep=True)
+    cfg.safety.disable_shutter_control = True
+    with respx.mock(assert_all_mocked=False, assert_all_called=False) as router:
+        mock_ha(router, cfg, states={"cover.observatory_roof": "closed"})
+        pool = HomeAssistantPool.from_config(cfg.home_assistant.instance)
+        registry = DeviceRegistry.from_config(cfg, pool)
+        dome = registry.domes[0]
+        # get_can_set_shutter reflects configuration completeness, not the lock.
+        assert dome.get_can_set_shutter() is True
+        assert await dome.get_shutter_status() == ShutterState.CLOSED
+
+
 def test_open_shutter_refused_without_safety_monitor(sample_config) -> None:
     cfg = sample_config.model_copy(deep=True)
     cfg.devices.domes[0].safety_monitor_ref = None

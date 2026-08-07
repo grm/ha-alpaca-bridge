@@ -18,6 +18,7 @@ def test_addon_options_build_valid_config(addon_options) -> None:
     )
     assert config.server.port == 11111
     assert config.server.discovery_enabled is False
+    assert config.safety.disable_shutter_control is False
     assert config.cache.ttl_seconds == 5
     assert len(config.devices.safety_monitors) == 2
     assert len(config.devices.domes) == 2
@@ -68,6 +69,26 @@ def test_discovery_can_be_enabled(addon_options_copy) -> None:
         ha_token=TEST_HA_TOKEN,
     )
     assert config.server.discovery_enabled is True
+
+
+def test_shutter_control_disabled_by_default(addon_options_copy) -> None:
+    addon_options_copy.pop("disable_shutter_control", None)
+    config = app_config_from_addon_options(
+        addon_options_copy,
+        ha_url=TEST_HA_URL,
+        ha_token=TEST_HA_TOKEN,
+    )
+    assert config.safety.disable_shutter_control is False
+
+
+def test_shutter_control_can_be_disabled(addon_options_copy) -> None:
+    addon_options_copy["disable_shutter_control"] = True
+    config = app_config_from_addon_options(
+        addon_options_copy,
+        ha_url=TEST_HA_URL,
+        ha_token=TEST_HA_TOKEN,
+    )
+    assert config.safety.disable_shutter_control is True
 
 
 def test_unknown_safety_monitor_reference(addon_options_copy) -> None:

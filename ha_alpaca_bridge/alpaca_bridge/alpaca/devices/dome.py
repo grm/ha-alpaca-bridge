@@ -135,6 +135,11 @@ class DomeDevice(BaseAlpacaDevice):
             )
         if self.ctx.client_disconnected:
             raise DomeSafetyError("Device is not connected", errors.NOT_CONNECTED)
+        if self.ctx.config.safety.disable_shutter_control:
+            raise DomeSafetyError(
+                "OpenShutter refused: shutter control disabled by add-on configuration",
+                errors.INVALID_OPERATION,
+            )
 
         await self._check_open_allowed()
 
@@ -155,6 +160,11 @@ class DomeDevice(BaseAlpacaDevice):
             )
         if self.ctx.client_disconnected:
             raise DomeSafetyError("Device is not connected", errors.NOT_CONNECTED)
+        if self.ctx.config.safety.disable_shutter_control:
+            raise DomeSafetyError(
+                "CloseShutter refused: shutter control disabled by add-on configuration",
+                errors.INVALID_OPERATION,
+            )
 
         close_service = self._config.close_service
         assert close_service is not None
